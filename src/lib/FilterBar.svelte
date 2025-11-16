@@ -37,8 +37,8 @@
 
   <div class="filters">
     <div class="filter-item">
-      <label>상태</label>
-      <select bind:value={localFilters.status} on:change={updateFilters}>
+      <label for="statusFilter">상태</label>
+      <select id="statusFilter" bind:value={localFilters.status} on:change={updateFilters}>
         <option value="전체">전체</option>
         {#each STATUS_OPTIONS as status}
           <option value={status}>{status}</option>
@@ -47,8 +47,8 @@
     </div>
 
     <div class="filter-item">
-      <label>우선순위</label>
-      <select bind:value={localFilters.priority} on:change={updateFilters}>
+      <label for="priorityFilter">우선순위</label>
+      <select id="priorityFilter" bind:value={localFilters.priority} on:change={updateFilters}>
         <option value="전체">전체</option>
         {#each PRIORITY_OPTIONS as priority}
           <option value={priority}>{priority}</option>
@@ -57,8 +57,8 @@
     </div>
 
     <div class="filter-item">
-      <label>작업자</label>
-      <select bind:value={localFilters.assignee} on:change={updateFilters}>
+      <label for="assigneeFilter">작업자</label>
+      <select id="assigneeFilter" bind:value={localFilters.assignee} on:change={updateFilters}>
         <option value="전체">전체</option>
         {#each ASSIGNEE_OPTIONS as assignee}
           <option value={assignee}>{assignee}</option>
@@ -67,8 +67,8 @@
     </div>
 
     <div class="filter-item">
-      <label>카테고리</label>
-      <select bind:value={localFilters.category} on:change={updateFilters}>
+      <label for="categoryFilter">카테고리</label>
+      <select id="categoryFilter" bind:value={localFilters.category} on:change={updateFilters}>
         <option value="전체">전체</option>
         {#each CATEGORY_OPTIONS as category}
           <option value={category}>{category}</option>
@@ -92,12 +92,12 @@
 
 <style>
   .filter-bar {
-    background: white;
-    border: 1px solid #e5e7eb;
-    border-radius: 16px;
-    padding: 24px;
+    background: var(--surface-strong);
+    border: 1px solid var(--panel-border);
+    border-radius: 28px;
+    padding: clamp(20px, 3vw, 32px);
     margin-bottom: 24px;
-    box-shadow: 0 1px 3px rgba(0, 0, 0, 0.08);
+    box-shadow: var(--shadow-soft);
     display: flex;
     flex-direction: column;
     gap: 20px;
@@ -106,23 +106,22 @@
   .bar-header {
     display: flex;
     flex-direction: column;
-    gap: 10px;
+    gap: 6px;
   }
 
   .bar-eyebrow {
     margin: 0;
-    font-size: 13px;
-    font-weight: 600;
-    color: #4f46e5;
-    letter-spacing: 0.04em;
+    font-size: 12px;
+    font-weight: 700;
+    color: var(--accent);
+    letter-spacing: 0.25em;
     text-transform: uppercase;
   }
 
   .bar-header h2 {
     margin: 0;
     font-size: 18px;
-    color: #111827;
-    font-weight: 600;
+    color: var(--text-primary);
   }
 
   .filters {
@@ -139,47 +138,48 @@
 
   .filter-item label {
     font-size: 13px;
-    font-weight: 500;
-    color: #374151;
+    font-weight: 600;
+    color: var(--muted-text);
   }
 
   select {
     width: 100%;
     padding: 10px 14px;
-    border: 1px solid #d1d5db;
-    border-radius: 8px;
+    border: 1px solid var(--control-border);
+    border-radius: 14px;
     font-size: 14px;
-    background: white;
+    background: var(--control-bg);
+    color: var(--text-primary);
     cursor: pointer;
     transition: border-color 0.2s, box-shadow 0.2s;
   }
 
   select:focus {
     outline: none;
-    border-color: #3b82f6;
-    box-shadow: 0 0 0 3px rgba(59, 130, 246, 0.15);
+    border-color: var(--accent);
+    box-shadow: 0 0 0 3px var(--control-focus);
   }
 
   .btn-reset {
     align-self: flex-start;
-    padding: 8px 18px;
+    padding: 10px 22px;
     border-radius: 999px;
-    border: 1px solid #d1d5db;
-    background: #f8fafc;
-    color: #1f2937;
-    font-weight: 600;
+    border: 1px dashed var(--panel-border);
+    background: transparent;
+    color: var(--text-primary);
+    font-weight: 700;
     font-size: 13px;
     cursor: pointer;
-    transition: background 0.2s, border-color 0.2s;
+    transition: background 0.2s, transform 0.2s;
   }
 
   .btn-reset:hover {
-    background: #eef2ff;
-    border-color: #c7d2fe;
+    background: var(--surface-muted);
+    transform: translateY(-1px);
   }
 
   .sort-row {
-    border-top: 1px solid #eef2f7;
+    border-top: 1px dashed var(--panel-border);
     padding-top: 14px;
     display: flex;
     justify-content: flex-end;
@@ -194,14 +194,15 @@
 
   .sort-control label {
     font-size: 12px;
-    color: #6b7280;
+    color: var(--muted-text);
     font-weight: 600;
-    letter-spacing: 0.04em;
+    letter-spacing: 0.2em;
     text-transform: uppercase;
   }
 
   @media (max-width: 640px) {
     .filter-bar {
+      border-radius: 20px;
       padding: 20px;
     }
 
