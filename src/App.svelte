@@ -1,56 +1,64 @@
 <script>
-import { todos, filterOptions, sortOption } from './lib/store.js';
-import TodoItem from './lib/TodoItem.svelte';
-import TodoForm from './lib/TodoForm.svelte';
-import FilterBar from './lib/FilterBar.svelte';
+  import { todos, filterOptions, sortOption } from './lib/store.js';
+  import TodoItem from './lib/TodoItem.svelte';
+  import TodoForm from './lib/TodoForm.svelte';
+  import FilterBar from './lib/FilterBar.svelte';
 
-  const designModes = [
-    {
-      id: 'pro',
+  const themeProfiles = {
+    professional: {
       title: '전문 상용프로그램',
       subtitle: '관제 센터처럼 안정적인 뷰',
-      tone: '안정적인 네이비와 글래스 효과로 정밀한 인상을 줍니다.',
+      tone: '정확한 선과 정제된 명암 대비로 높은 시인성을 보장합니다.',
       highlights: [
-        '모듈형 레이아웃과 고정 폭 카드로 정보가 흔들리지 않음',
-        '숫자 카드와 탭에 대비를 주어 즉시 상태 확인',
-        '글래스 모피즘 효과로 최신 상용 솔루션 감성 구현'
+        '모듈형 카드와 일정한 여백으로 정보가 흔들리지 않음',
+        '숫자 위주의 패널을 대비 높게 디자인해 즉시 상태 파악',
+        '글래스 모피즘 느낌을 은은하게 적용해 최신 상용 감성 구현'
       ]
     },
-    {
-      id: 'bento',
+    bento: {
       title: '벤토 스타일',
       subtitle: '쿨하고 감각적인 인터페이스',
-      tone: '네온 포인트와 라운드 그리드로 트렌디하게 정리했습니다.',
+      tone: '네온 포인트와 라운드 그리드로 정리된 정보를 제공합니다.',
       highlights: [
-        '카드마다 톤이 다른 벤토 그리드 구성',
-        '도형 아이콘과 색상 태그로 정보 분류 강화',
-        '모션이 느껴지는 그라디언트와 그림자로 존재감 확보'
+        '각 카드에 톤 변주를 주어 시선을 끌면서도 질서를 유지',
+        '색상 태그와 아이콘 조합으로 분류를 직관적으로 표현',
+        '그라데이션과 깊은 그림자로 입체감 확보'
       ]
     },
-    {
-      id: 'industrial',
+    industrial: {
       title: '산업 현장형',
       subtitle: '전통적인 공정 감성',
-      tone: '거친 텍스처와 강한 색 대비로 현장 친화적인 무드를 냈습니다.',
+      tone: '굵은 구분선과 안전색 대비로 현장 친화적인 UI를 완성했습니다.',
       highlights: [
-        '검은 철판 배경에 주황색 안전 컬러를 포인트로 사용',
-        '격자 분할과 굵은 구분선으로 명령 체계 표현',
-        '큰 숫자와 라벨로 장갑 착용 상태에서도 가독성 확보'
+        '검정/회색 베이스에 안전 주황 포인트로 경고 인지 강화',
+        '격자형 분할과 강한 라인으로 작업 단계를 명확히 표기',
+        '큰 타이포와 라벨로 장갑 착용 시에도 가독성 확보'
       ]
     }
+  };
+
+  const themeOptions = [
+    { id: 'professional-light', label: 'Professional · Light', group: 'professional', modeLabel: 'Light' },
+    { id: 'professional-dark', label: 'Professional · Dark', group: 'professional', modeLabel: 'Dark' },
+    { id: 'bento-light', label: 'Bento · Light', group: 'bento', modeLabel: 'Light' },
+    { id: 'bento-dark', label: 'Bento · Dark', group: 'bento', modeLabel: 'Dark' },
+    { id: 'industrial-light', label: 'Industrial · Light', group: 'industrial', modeLabel: 'Light' },
+    { id: 'industrial-dark', label: 'Industrial · Dark', group: 'industrial', modeLabel: 'Dark' }
   ];
 
-  let selectedDesign = designModes[0];
+  let selectedThemeId = themeOptions[0].id;
   let showForm = false;
   let editingTodo = null;
-const statusTabs = ['전체', '대기', '진행중', '완료'];
+  const statusTabs = ['전체', '대기', '진행중', '완료'];
+
+  $: selectedThemeOption = themeOptions.find((option) => option.id === selectedThemeId) ?? themeOptions[0];
+  $: selectedProfile = themeProfiles[selectedThemeOption.group];
 
   // 필터링 및 정렬된 작업 목록
   $: filteredAndSortedTodos = filterAndSort($todos, $filterOptions, $sortOption);
 
   function filterAndSort(todoList, filters, sortBy) {
-    // 필터링
-    let filtered = todoList.filter(todo => {
+    let filtered = todoList.filter((todo) => {
       if (filters.status !== '전체' && todo.status !== filters.status) return false;
       if (filters.priority !== '전체' && todo.priority !== filters.priority) return false;
       if (filters.assignee !== '전체' && todo.assignee !== filters.assignee) return false;
@@ -58,27 +66,21 @@ const statusTabs = ['전체', '대기', '진행중', '완료'];
       return true;
     });
 
-    // 정렬
     filtered.sort((a, b) => {
       switch (sortBy) {
         case 'dueDate':
-          // 마감일 없는 항목은 맨 뒤로
           if (!a.dueDate && !b.dueDate) return 0;
           if (!a.dueDate) return 1;
           if (!b.dueDate) return -1;
           return new Date(a.dueDate) - new Date(b.dueDate);
-
         case 'priority':
-          const priorityOrder = { '긴급': 0, '높음': 1, '보통': 2, '낮음': 3 };
+          const priorityOrder = { 긴급: 0, 높음: 1, 보통: 2, 낮음: 3 };
           return priorityOrder[a.priority] - priorityOrder[b.priority];
-
         case 'status':
-          const statusOrder = { '진행중': 0, '대기': 1, '완료': 2 };
+          const statusOrder = { 진행중: 0, 대기: 1, 완료: 2 };
           return statusOrder[a.status] - statusOrder[b.status];
-
         case 'createdAt':
           return new Date(b.createdAt) - new Date(a.createdAt);
-
         default:
           return 0;
       }
@@ -90,10 +92,10 @@ const statusTabs = ['전체', '대기', '진행중', '완료'];
   // 통계 계산
   $: stats = {
     total: $todos.length,
-    pending: $todos.filter(t => t.status === '대기').length,
-    inProgress: $todos.filter(t => t.status === '진행중').length,
-    completed: $todos.filter(t => t.status === '완료').length,
-    overdue: $todos.filter(t => {
+    pending: $todos.filter((t) => t.status === '대기').length,
+    inProgress: $todos.filter((t) => t.status === '진행중').length,
+    completed: $todos.filter((t) => t.status === '완료').length,
+    overdue: $todos.filter((t) => {
       if (!t.dueDate || t.status === '완료') return false;
       return new Date(t.dueDate) < new Date();
     }).length
@@ -127,125 +129,99 @@ const statusTabs = ['전체', '대기', '진행중', '완료'];
     editingTodo = null;
   }
 
-function selectDesign(mode) {
-  selectedDesign = mode;
-}
+  function setStatusFilter(status) {
+    filterOptions.update((options) => ({ ...options, status }));
+  }
 
-function setStatusFilter(status) {
-  filterOptions.update(options => ({ ...options, status }));
-}
-
-$: if (typeof document !== 'undefined') {
-  document.body.dataset.design = selectedDesign.id;
-}
+  $: if (typeof document !== 'undefined') {
+    document.body.dataset.theme = selectedThemeId;
+  }
 </script>
 
-<main class={`design-shell design-${selectedDesign.id}`}>
+<main class="app-shell" data-theme={selectedThemeId}>
   <div class="container">
-    <section class="design-intro">
-      <div>
+    <header class="app-header">
+      <div class="header-brand">
         <p class="eyebrow">디자인 실험실</p>
         <h1>🏭 공장 유지보수 관리</h1>
-        <p class="intro-text">
-          요구 조건(시인성 · 쉬운 사용법 · 명확한 선)을 모두 만족시키도록 세 가지 콘셉트를 적용했습니다.
-          아래에서 원하는 타입을 선택해 실제 화면에 입혀보세요.
-        </p>
+        <p class="brand-copy">{selectedProfile.tone}</p>
       </div>
-      <div class="design-pill">현재 선택: {selectedDesign.title}</div>
-    </section>
+      <div class="theme-switcher">
+        <label for="themeSelect">테마 · 모드</label>
+        <select id="themeSelect" bind:value={selectedThemeId} aria-label="디자인 테마 선택">
+          {#each themeOptions as option}
+            <option value={option.id}>{option.label}</option>
+          {/each}
+        </select>
+        <p class="theme-chip">{selectedProfile.title} · {selectedThemeOption.modeLabel}</p>
+      </div>
+    </header>
 
-    <section class="design-selector" aria-label="디자인 타입 선택">
-      {#each designModes as mode}
-        <button
-          type="button"
-          class="design-card"
-          class:active={mode.id === selectedDesign.id}
-          on:click={() => selectDesign(mode)}
-          aria-pressed={mode.id === selectedDesign.id}
-        >
-          <div class="card-head">
-            <span class="card-title">{mode.title}</span>
-            <span class="card-chip">{mode.subtitle}</span>
-          </div>
-          <p class="card-copy">{mode.tone}</p>
-        </button>
-      {/each}
-    </section>
-
-    <section class="design-brief">
+    <section class="theme-brief" aria-label="테마 요약">
       <div class="brief-card">
-        <p class="brief-label">스타일 핵심</p>
+        <p class="brief-label">설명</p>
+        <p class="brief-copy">{selectedProfile.subtitle}</p>
+      </div>
+      <div class="brief-card highlights">
+        <p class="brief-label">핵심 포인트</p>
         <ul>
-          {#each selectedDesign.highlights as highlight}
+          {#each selectedProfile.highlights as highlight}
             <li>{highlight}</li>
           {/each}
         </ul>
       </div>
-      <div class="brief-card">
-        <p class="brief-label">공통 가이드</p>
-        <ul>
-          <li>확실한 시인성을 위해 대비가 높은 색상과 큼직한 숫자를 유지합니다.</li>
-          <li>사용 흐름은 기존과 동일하게 두어 학습비용을 줄였습니다.</li>
-          <li>명확한 선과 구분선을 강조해 작업 분리 감각을 줍니다.</li>
-        </ul>
-      </div>
     </section>
 
-    <header>
-      <div class="header-grid">
-        <div class="header-main">
-          <div class="header-content">
-            <h2>실시간 작업 현황</h2>
-            <button class="btn-add" on:click={openForm}>
-              + 새 작업 추가
-            </button>
-          </div>
-
-          <div class="status-tabs" role="tablist" aria-label="작업 상태 필터">
-            {#each statusTabs as status}
-              <button
-                type="button"
-                class="status-tab"
-                class:active={$filterOptions.status === status}
-                role="tab"
-                aria-selected={$filterOptions.status === status}
-                aria-controls="todo-list"
-                on:click={() => setStatusFilter(status)}
-              >
-                {status}
-              </button>
-            {/each}
-          </div>
+    <section class="dashboard-header">
+      <div class="header-main">
+        <div class="header-content">
+          <h2>실시간 작업 현황</h2>
+          <p class="header-description">필터와 정렬로 즉시 상태를 확인하세요.</p>
         </div>
-
-        <div class="stats-panel">
-          <div class="stats-bar">
-            <div class="stat-item">
-              <span class="stat-label">전체</span>
-              <span class="stat-value">{stats.total}</span>
-            </div>
-            <div class="stat-item">
-              <span class="stat-label">대기</span>
-              <span class="stat-value status-pending">{stats.pending}</span>
-            </div>
-            <div class="stat-item">
-              <span class="stat-label">진행중</span>
-              <span class="stat-value status-progress">{stats.inProgress}</span>
-            </div>
-            <div class="stat-item">
-              <span class="stat-label">완료</span>
-              <span class="stat-value status-completed">{stats.completed}</span>
-            </div>
-            {#if stats.overdue > 0}
-              <div class="stat-item">
-                <span class="stat-label">지연</span>
-                <span class="stat-value status-overdue">{stats.overdue}</span>
-              </div>
-            {/if}
-          </div>
-        </div>
+        <button class="btn-add" on:click={openForm}>+ 새 작업 추가</button>
       </div>
-    </header>
+
+      <div class="status-tabs" role="tablist" aria-label="작업 상태 필터">
+        {#each statusTabs as status}
+          <button
+            type="button"
+            class="status-tab"
+            class:active={$filterOptions.status === status}
+            role="tab"
+            aria-selected={$filterOptions.status === status}
+            aria-controls="todo-list"
+            on:click={() => setStatusFilter(status)}
+          >
+            {status}
+          </button>
+        {/each}
+      </div>
+
+      <div class="stats-panel">
+        <div class="stat-item">
+          <span class="stat-label">전체</span>
+          <span class="stat-value">{stats.total}</span>
+        </div>
+        <div class="stat-item">
+          <span class="stat-label">대기</span>
+          <span class="stat-value status-pending">{stats.pending}</span>
+        </div>
+        <div class="stat-item">
+          <span class="stat-label">진행중</span>
+          <span class="stat-value status-progress">{stats.inProgress}</span>
+        </div>
+        <div class="stat-item">
+          <span class="stat-label">완료</span>
+          <span class="stat-value status-completed">{stats.completed}</span>
+        </div>
+        {#if stats.overdue > 0}
+          <div class="stat-item">
+            <span class="stat-label">지연</span>
+            <span class="stat-value status-overdue">{stats.overdue}</span>
+          </div>
+        {/if}
+      </div>
+    </section>
 
     <FilterBar />
 
@@ -261,12 +237,7 @@ $: if (typeof document !== 'undefined') {
         </div>
       {:else}
         {#each filteredAndSortedTodos as todo (todo.id)}
-          <TodoItem
-            {todo}
-            on:edit={handleEdit}
-            on:update={handleUpdate}
-            on:delete={handleDelete}
-          />
+          <TodoItem {todo} on:edit={handleEdit} on:update={handleUpdate} on:delete={handleDelete} />
         {/each}
       {/if}
     </div>
@@ -283,45 +254,23 @@ $: if (typeof document !== 'undefined') {
 
 <style>
   :global(body) {
-    background: #0f172a;
-    color: #f8fafc;
-    transition: background 0.4s ease;
+    margin: 0;
+    font-family: 'Pretendard', 'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif;
+    line-height: 1.5;
+    background: var(--page-bg, #f4f6fb);
+    color: var(--text-primary, #0f172a);
+    transition: background 0.4s ease, color 0.2s ease;
   }
 
-  :global(body[data-design='bento']) {
-    background: #fdf2ff;
-    color: #0f172a;
+  :global(body[data-theme]) {
+    min-height: 100vh;
   }
 
-  :global(body[data-design='industrial']) {
-    background: #050709;
-    color: #f8fafc;
+  :global(button, input, select, textarea) {
+    font-family: inherit;
   }
 
-  .design-shell {
-    --page-bg: #f4f6fb;
-    --surface: rgba(255, 255, 255, 0.9);
-    --surface-strong: #ffffff;
-    --surface-muted: rgba(255, 255, 255, 0.6);
-    --panel-border: rgba(15, 23, 42, 0.08);
-    --text-primary: #0f172a;
-    --muted-text: #6b7280;
-    --accent: #2563eb;
-    --accent-strong: #22d3ee;
-    --chip-bg: rgba(37, 99, 235, 0.12);
-    --chip-text: #1d4ed8;
-    --shadow-soft: 0 20px 40px rgba(15, 23, 42, 0.16);
-    --control-bg: rgba(255, 255, 255, 0.85);
-    --control-border: rgba(15, 23, 42, 0.12);
-    --control-focus: rgba(37, 99, 235, 0.35);
-    --card-radius: 22px;
-    --status-pending: #94a3b8;
-    --status-progress: #2563eb;
-    --status-completed: #10b981;
-    --status-overdue: #dc2626;
-    --danger: #ef4444;
-    --warning: #f97316;
-    --safe: #10b981;
+  .app-shell {
     min-height: 100vh;
     padding: clamp(20px, 4vw, 56px);
     background: var(--page-bg);
@@ -329,7 +278,297 @@ $: if (typeof document !== 'undefined') {
     transition: background 0.4s ease, color 0.2s ease;
   }
 
-  .design-shell.design-pro {
+  .container {
+    max-width: 1200px;
+    margin: 0 auto;
+    display: flex;
+    flex-direction: column;
+    gap: 24px;
+  }
+
+  .app-header {
+    display: flex;
+    gap: clamp(16px, 3vw, 32px);
+    align-items: flex-start;
+    justify-content: space-between;
+    padding: clamp(20px, 3vw, 36px);
+    border-radius: 32px;
+    border: 1px solid var(--panel-border);
+    background: var(--surface);
+    box-shadow: var(--shadow-soft);
+    flex-wrap: wrap;
+  }
+
+  .header-brand {
+    flex: 1;
+    min-width: 240px;
+  }
+
+  .eyebrow {
+    margin: 0 0 8px;
+    font-size: 12px;
+    font-weight: 700;
+    letter-spacing: 0.25em;
+    text-transform: uppercase;
+    color: var(--accent);
+  }
+
+  .brand-copy {
+    margin: 12px 0 0;
+    color: var(--muted-text);
+    max-width: 460px;
+  }
+
+  .theme-switcher {
+    display: flex;
+    flex-direction: column;
+    gap: 8px;
+    min-width: 220px;
+  }
+
+  .theme-switcher label {
+    font-size: 12px;
+    text-transform: uppercase;
+    letter-spacing: 0.2em;
+    color: var(--muted-text);
+  }
+
+  .theme-switcher select {
+    padding: 12px 16px;
+    border-radius: 16px;
+    border: 1px solid var(--control-border);
+    background: var(--control-bg);
+    color: var(--text-primary);
+    font-weight: 600;
+    cursor: pointer;
+    transition: border-color 0.2s, box-shadow 0.2s;
+  }
+
+  .theme-switcher select:focus {
+    outline: none;
+    border-color: var(--accent);
+    box-shadow: 0 0 0 3px var(--control-focus);
+  }
+
+  .theme-chip {
+    margin: 0;
+    font-size: 13px;
+    font-weight: 600;
+    color: var(--accent);
+  }
+
+  .theme-brief {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(240px, 1fr));
+    gap: 16px;
+  }
+
+  .brief-card {
+    background: var(--surface);
+    border: 1px solid var(--panel-border);
+    border-radius: 24px;
+    padding: 20px;
+    box-shadow: var(--shadow-soft);
+  }
+
+  .brief-label {
+    margin: 0 0 8px;
+    font-size: 12px;
+    font-weight: 700;
+    letter-spacing: 0.3em;
+    color: var(--accent);
+    text-transform: uppercase;
+  }
+
+  .brief-copy {
+    margin: 0;
+    color: var(--text-primary);
+  }
+
+  .highlights ul {
+    margin: 0;
+    padding-left: 18px;
+    color: var(--text-primary);
+    display: flex;
+    flex-direction: column;
+    gap: 6px;
+  }
+
+  .dashboard-header {
+    background: var(--surface-strong);
+    border: 1px solid var(--panel-border);
+    border-radius: 32px;
+    padding: clamp(20px, 3vw, 36px);
+    box-shadow: var(--shadow-soft);
+    display: flex;
+    flex-direction: column;
+    gap: 18px;
+  }
+
+  .header-main {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 16px;
+    justify-content: space-between;
+    align-items: center;
+  }
+
+  .header-content h2 {
+    margin: 0;
+    font-size: clamp(20px, 3vw, 28px);
+  }
+
+  .header-description {
+    margin: 6px 0 0;
+    color: var(--muted-text);
+    font-size: 14px;
+  }
+
+  .btn-add {
+    padding: 12px 28px;
+    border-radius: 999px;
+    border: none;
+    font-weight: 700;
+    font-size: 15px;
+    color: #fff;
+    background: linear-gradient(120deg, var(--accent), var(--accent-strong));
+    cursor: pointer;
+    box-shadow: 0 18px 30px rgba(0, 0, 0, 0.25);
+    transition: transform 0.2s ease;
+  }
+
+  .btn-add:hover {
+    transform: translateY(-2px);
+  }
+
+  .status-tabs {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 8px;
+  }
+
+  .status-tab {
+    flex: 1;
+    min-width: 120px;
+    padding: 10px 14px;
+    border-radius: 16px;
+    border: 1px solid var(--panel-border);
+    background: var(--surface);
+    color: var(--text-primary);
+    font-weight: 600;
+    cursor: pointer;
+    transition: background 0.2s ease, color 0.2s ease;
+  }
+
+  .status-tab.active {
+    background: var(--accent);
+    color: #fff;
+    border-color: transparent;
+  }
+
+  .stats-panel {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(120px, 1fr));
+    gap: 12px;
+  }
+
+  .stat-item {
+    border-radius: 18px;
+    padding: 16px;
+    background: var(--surface);
+    border: 1px solid var(--panel-border);
+    display: flex;
+    flex-direction: column;
+    gap: 4px;
+  }
+
+  .stat-label {
+    font-size: 12px;
+    color: var(--muted-text);
+    letter-spacing: 0.1em;
+    text-transform: uppercase;
+  }
+
+  .stat-value {
+    font-size: 24px;
+    font-weight: 700;
+  }
+
+  .status-pending {
+    color: var(--status-pending);
+  }
+
+  .status-progress {
+    color: var(--status-progress);
+  }
+
+  .status-completed {
+    color: var(--status-completed);
+  }
+
+  .status-overdue {
+    color: var(--status-overdue);
+  }
+
+  .todo-list {
+    display: flex;
+    flex-direction: column;
+  }
+
+  .empty-state {
+    border: 1px dashed var(--panel-border);
+    border-radius: 20px;
+    padding: 32px;
+    text-align: center;
+    background: var(--surface);
+  }
+
+  .empty-state p {
+    margin: 0;
+  }
+
+  .hint {
+    margin-top: 8px;
+    color: var(--muted-text);
+  }
+
+  @media (max-width: 768px) {
+    .status-tab {
+      flex: 1 1 calc(50% - 8px);
+    }
+
+    .theme-switcher {
+      width: 100%;
+    }
+  }
+
+  :global(body[data-theme='professional-light']) {
+    --page-bg: radial-gradient(circle at 20% 20%, #eef2ff 0%, #f8fafc 60%, #eef2ff 100%);
+    --surface: rgba(255, 255, 255, 0.92);
+    --surface-strong: #ffffff;
+    --surface-muted: rgba(15, 23, 42, 0.04);
+    --panel-border: rgba(15, 23, 42, 0.12);
+    --text-primary: #0f172a;
+    --muted-text: #4b5563;
+    --accent: #2563eb;
+    --accent-strong: #38bdf8;
+    --chip-bg: rgba(37, 99, 235, 0.12);
+    --chip-text: #1d4ed8;
+    --shadow-soft: 0 20px 40px rgba(15, 23, 42, 0.12);
+    --control-bg: rgba(255, 255, 255, 0.96);
+    --control-border: rgba(15, 23, 42, 0.12);
+    --control-focus: rgba(37, 99, 235, 0.25);
+    --card-radius: 22px;
+    --status-pending: #94a3b8;
+    --status-progress: #2563eb;
+    --status-completed: #0ea5e9;
+    --status-overdue: #dc2626;
+    --danger: #ef4444;
+    --warning: #f97316;
+    --safe: #10b981;
+  }
+
+  :global(body[data-theme='professional-dark']) {
     --page-bg: radial-gradient(circle at 20% 20%, #1b2545, #080d1a 70%);
     --surface: rgba(8, 13, 28, 0.85);
     --surface-strong: rgba(11, 18, 35, 0.85);
@@ -355,7 +594,7 @@ $: if (typeof document !== 'undefined') {
     --safe: #34d399;
   }
 
-  .design-shell.design-bento {
+  :global(body[data-theme='bento-light']) {
     --page-bg: radial-gradient(circle at 20% 20%, #fdf2ff 0%, #e0f2fe 45%, #fef9c3 100%);
     --surface: rgba(255, 255, 255, 0.86);
     --surface-strong: rgba(255, 255, 255, 0.95);
@@ -381,7 +620,59 @@ $: if (typeof document !== 'undefined') {
     --safe: #22d3ee;
   }
 
-  .design-shell.design-industrial {
+  :global(body[data-theme='bento-dark']) {
+    --page-bg: radial-gradient(circle at 10% 20%, #160b2f 0%, #061a2d 55%, #010914 100%);
+    --surface: rgba(13, 14, 28, 0.85);
+    --surface-strong: rgba(18, 20, 40, 0.9);
+    --surface-muted: rgba(255, 255, 255, 0.08);
+    --panel-border: rgba(248, 250, 252, 0.08);
+    --text-primary: #f8f7ff;
+    --muted-text: #cbd5f5;
+    --accent: #c084fc;
+    --accent-strong: #22d3ee;
+    --chip-bg: rgba(161, 98, 255, 0.25);
+    --chip-text: #f5f3ff;
+    --shadow-soft: 0 25px 70px rgba(0, 0, 0, 0.6);
+    --control-bg: rgba(11, 13, 30, 0.8);
+    --control-border: rgba(208, 191, 255, 0.4);
+    --control-focus: rgba(34, 211, 238, 0.45);
+    --card-radius: 28px;
+    --status-pending: #a5b4fc;
+    --status-progress: #818cf8;
+    --status-completed: #34d399;
+    --status-overdue: #fb7185;
+    --danger: #fb7185;
+    --warning: #facc15;
+    --safe: #34d399;
+  }
+
+  :global(body[data-theme='industrial-light']) {
+    --page-bg: linear-gradient(130deg, #fff8eb 0%, #f8fafc 65%, #e2e8f0 100%);
+    --surface: rgba(255, 255, 255, 0.94);
+    --surface-strong: #ffffff;
+    --surface-muted: rgba(251, 146, 60, 0.08);
+    --panel-border: rgba(30, 41, 59, 0.12);
+    --text-primary: #111827;
+    --muted-text: #4b5563;
+    --accent: #c2410c;
+    --accent-strong: #f97316;
+    --chip-bg: rgba(234, 88, 12, 0.15);
+    --chip-text: #b45309;
+    --shadow-soft: 0 25px 50px rgba(15, 23, 42, 0.15);
+    --control-bg: #fffdf9;
+    --control-border: rgba(249, 115, 22, 0.35);
+    --control-focus: rgba(249, 115, 22, 0.35);
+    --card-radius: 18px;
+    --status-pending: #78716c;
+    --status-progress: #ea580c;
+    --status-completed: #16a34a;
+    --status-overdue: #b91c1c;
+    --danger: #dc2626;
+    --warning: #f59e0b;
+    --safe: #16a34a;
+  }
+
+  :global(body[data-theme='industrial-dark']) {
     --page-bg: repeating-linear-gradient(135deg, #050709 0, #050709 20px, #090c12 20px, #090c12 40px);
     --surface: rgba(10, 12, 16, 0.92);
     --surface-strong: #111417;
@@ -398,312 +689,12 @@ $: if (typeof document !== 'undefined') {
     --control-border: rgba(249, 115, 22, 0.45);
     --control-focus: rgba(249, 115, 22, 0.55);
     --card-radius: 16px;
-    --status-pending: #cbd5f5;
+    --status-pending: #94a3b8;
     --status-progress: #f97316;
-    --status-completed: #22c55e;
-    --status-overdue: #fbbf24;
-    --danger: #f87171;
-    --warning: #fbbf24;
-    --safe: #22c55e;
-  }
-
-  .container {
-    max-width: 1280px;
-    margin: 0 auto;
-    display: flex;
-    flex-direction: column;
-    gap: 24px;
-  }
-
-  .design-intro {
-    background: var(--surface);
-    border: 1px solid var(--panel-border);
-    border-radius: 28px;
-    padding: clamp(20px, 4vw, 40px);
-    display: flex;
-    flex-direction: column;
-    gap: 16px;
-    box-shadow: var(--shadow-soft);
-  }
-
-  .design-shell.design-pro .design-intro {
-    backdrop-filter: blur(20px);
-  }
-
-  .design-intro h1 {
-    margin: 0;
-    font-size: clamp(28px, 4vw, 40px);
-  }
-
-  .design-intro .intro-text {
-    margin: 0;
-    color: var(--muted-text);
-  }
-
-  .eyebrow {
-    margin: 0;
-    text-transform: uppercase;
-    letter-spacing: 0.2em;
-    font-size: 12px;
-    color: var(--accent-strong);
-    font-weight: 700;
-  }
-
-  .design-pill {
-    align-self: flex-start;
-    padding: 10px 20px;
-    border-radius: 999px;
-    border: 1px solid var(--panel-border);
-    background: var(--surface-muted);
-    font-weight: 600;
-  }
-
-  .design-selector {
-    display: grid;
-    grid-template-columns: repeat(auto-fit, minmax(220px, 1fr));
-    gap: 16px;
-  }
-
-  .design-card {
-    border-radius: 20px;
-    border: 1px solid var(--panel-border);
-    padding: 20px;
-    text-align: left;
-    cursor: pointer;
-    background: var(--surface);
-    color: inherit;
-    box-shadow: var(--shadow-soft);
-    transition: transform 0.2s ease, border-color 0.2s ease, box-shadow 0.2s ease;
-  }
-
-  .design-card .card-title {
-    font-size: 16px;
-    font-weight: 700;
-  }
-
-  .card-head {
-    display: flex;
-    justify-content: space-between;
-    align-items: center;
-    gap: 12px;
-    margin-bottom: 12px;
-  }
-
-  .card-chip {
-    padding: 4px 10px;
-    border-radius: 999px;
-    font-size: 12px;
-    background: var(--chip-bg);
-    color: var(--chip-text);
-    font-weight: 600;
-  }
-
-  .card-copy {
-    margin: 0;
-    color: var(--muted-text);
-  }
-
-  .design-card.active {
-    border-color: var(--accent);
-    transform: translateY(-4px);
-    box-shadow: 0 20px 60px rgba(0, 0, 0, 0.25);
-  }
-
-  .design-brief {
-    display: grid;
-    grid-template-columns: repeat(auto-fit, minmax(260px, 1fr));
-    gap: 16px;
-  }
-
-  .brief-card {
-    background: var(--surface);
-    border: 1px solid var(--panel-border);
-    border-radius: 24px;
-    padding: 20px;
-    box-shadow: var(--shadow-soft);
-  }
-
-  .brief-card ul {
-    margin: 12px 0 0 0;
-    padding-left: 18px;
-    color: var(--muted-text);
-    line-height: 1.6;
-  }
-
-  .brief-label {
-    margin: 0;
-    font-size: 14px;
-    letter-spacing: 0.1em;
-    text-transform: uppercase;
-    color: var(--accent);
-  }
-
-  header {
-    background: var(--surface-strong);
-    border-radius: 28px;
-    padding: clamp(20px, 3vw, 36px);
-    border: 1px solid var(--panel-border);
-    box-shadow: var(--shadow-soft);
-  }
-
-  .header-grid {
-    display: flex;
-    flex-direction: column;
-    gap: 24px;
-  }
-
-  .header-main {
-    display: flex;
-    flex-direction: column;
-    gap: 16px;
-  }
-
-  .header-content {
-    display: flex;
-    flex-direction: column;
-    gap: 12px;
-  }
-
-  .header-content h2 {
-    margin: 0;
-    font-size: clamp(22px, 3vw, 28px);
-  }
-
-  .btn-add {
-    align-self: flex-start;
-    padding: 12px 28px;
-    border-radius: 999px;
-    border: none;
-    font-size: 15px;
-    font-weight: 700;
-    background: linear-gradient(120deg, var(--accent), var(--accent-strong));
-    color: #fff;
-    cursor: pointer;
-    box-shadow: 0 12px 30px rgba(0, 0, 0, 0.25);
-    transition: transform 0.2s ease, box-shadow 0.2s ease;
-  }
-
-  .design-shell.design-industrial .btn-add {
-    text-transform: uppercase;
-    letter-spacing: 0.1em;
-  }
-
-  .btn-add:hover {
-    transform: translateY(-3px) scale(1.01);
-    box-shadow: 0 20px 45px rgba(0, 0, 0, 0.35);
-  }
-
-  .status-tabs {
-    display: flex;
-    flex-wrap: wrap;
-    gap: 12px;
-  }
-
-  .status-tab {
-    border-radius: 16px;
-    border: 1px solid var(--panel-border);
-    background: var(--surface-muted);
-    color: var(--muted-text);
-    padding: 10px 18px;
-    font-size: 14px;
-    font-weight: 600;
-    cursor: pointer;
-    transition: all 0.2s ease;
-  }
-
-  .status-tab.active {
-    background: var(--accent);
-    color: #fff;
-    border-color: var(--accent);
-    box-shadow: 0 12px 20px rgba(0, 0, 0, 0.25);
-  }
-
-  .stats-panel {
-    padding-top: 12px;
-  }
-
-  .stats-bar {
-    display: grid;
-    grid-template-columns: repeat(auto-fit, minmax(120px, 1fr));
-    gap: 16px;
-    padding-top: 12px;
-    border-top: 1px solid var(--panel-border);
-  }
-
-  .stat-item {
-    display: flex;
-    flex-direction: column;
-    gap: 6px;
-  }
-
-  .stat-label {
-    font-size: 12px;
-    letter-spacing: 0.2em;
-    text-transform: uppercase;
-    color: var(--muted-text);
-  }
-
-  .stat-value {
-    font-size: clamp(22px, 4vw, 32px);
-    font-weight: 700;
-  }
-
-  .status-pending { color: var(--status-pending); }
-  .status-progress { color: var(--status-progress); }
-  .status-completed { color: var(--status-completed); }
-  .status-overdue { color: var(--status-overdue); }
-
-  .todo-list {
-    margin-top: 8px;
-  }
-
-  .empty-state {
-    background: var(--surface);
-    border: 2px dashed var(--panel-border);
-    border-radius: 24px;
-    padding: 60px 20px;
-    text-align: center;
-    color: var(--muted-text);
-  }
-
-  .empty-state .hint {
-    margin-top: 8px;
-    font-size: 14px;
-  }
-
-  @media (min-width: 1024px) {
-    .design-intro {
-      flex-direction: row;
-      align-items: center;
-      justify-content: space-between;
-    }
-
-    .header-grid {
-      display: grid;
-      grid-template-columns: minmax(0, 1.5fr) minmax(320px, 1fr);
-      align-items: center;
-      gap: 32px;
-    }
-
-    .stats-panel {
-      padding-left: 24px;
-      border-left: 1px solid var(--panel-border);
-    }
-
-    .stats-bar {
-      border-top: none;
-      padding-top: 0;
-    }
-  }
-
-  @media (max-width: 640px) {
-    .design-intro {
-      border-radius: 20px;
-    }
-
-    .btn-add {
-      width: 100%;
-      text-align: center;
-    }
+    --status-completed: #22d3ee;
+    --status-overdue: #f43f5e;
+    --danger: #f43f5e;
+    --warning: #facc15;
+    --safe: #22d3ee;
   }
 </style>
