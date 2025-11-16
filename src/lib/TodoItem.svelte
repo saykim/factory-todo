@@ -123,57 +123,57 @@
 
 <style>
   .todo-item {
-    background: white;
-    border: 1px solid #e5e7eb;
-    border-radius: 8px;
-    padding: 16px;
-    margin-bottom: 12px;
-    box-shadow: 0 1px 3px rgba(0, 0, 0, 0.1);
-    transition: all 0.2s;
+    background: var(--surface-strong);
+    border: 1px solid var(--panel-border);
+    border-radius: var(--card-radius);
+    padding: 20px;
+    margin-bottom: 16px;
+    box-shadow: var(--shadow-soft);
+    transition: transform 0.2s ease, box-shadow 0.2s ease;
   }
 
   .todo-item:hover {
-    box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+    transform: translateY(-4px);
+    box-shadow: 0 25px 40px rgba(0, 0, 0, 0.2);
   }
 
   .todo-item.completed {
-    opacity: 0.7;
-    background: #f9fafb;
+    border-style: dashed;
+    opacity: 0.9;
   }
 
   .todo-header {
     display: flex;
     justify-content: space-between;
     align-items: flex-start;
-    margin-bottom: 12px;
+    margin-bottom: 16px;
+    gap: 12px;
   }
 
   .todo-title-section {
     display: flex;
     align-items: center;
-    gap: 8px;
+    gap: 10px;
     flex: 1;
   }
 
   h3 {
     margin: 0;
-    font-size: 18px;
-    font-weight: 600;
-    color: #111827;
+    font-size: 20px;
   }
 
   .completed h3 {
     text-decoration: line-through;
-    color: #6b7280;
+    opacity: 0.8;
   }
 
   .category-badge {
-    padding: 4px 8px;
-    background: #e0e7ff;
-    color: #3730a3;
-    border-radius: 4px;
+    padding: 4px 10px;
+    border-radius: 999px;
     font-size: 12px;
-    font-weight: 500;
+    font-weight: 600;
+    background: var(--chip-bg);
+    color: var(--chip-text);
   }
 
   .todo-actions {
@@ -181,117 +181,109 @@
     gap: 8px;
   }
 
-  .btn-edit, .btn-delete {
+  .btn-edit,
+  .btn-delete {
     padding: 6px 12px;
+    border-radius: 999px;
     border: none;
-    border-radius: 4px;
     cursor: pointer;
-    font-size: 14px;
-    transition: all 0.2s;
+    font-size: 13px;
+    font-weight: 600;
+    transition: transform 0.2s ease, opacity 0.2s ease;
   }
 
   .btn-edit {
-    background: #3b82f6;
-    color: white;
-  }
-
-  .btn-edit:hover {
-    background: #2563eb;
+    background: var(--accent);
+    color: #fff;
   }
 
   .btn-delete {
-    background: #ef4444;
-    color: white;
+    background: var(--danger);
+    color: #fff;
   }
 
+  .btn-edit:hover,
   .btn-delete:hover {
-    background: #dc2626;
+    transform: translateY(-1px);
+    opacity: 0.9;
   }
 
   .description {
-    color: #4b5563;
-    margin: 0 0 12px 0;
-    line-height: 1.5;
+    color: var(--muted-text);
+    margin: 0 0 16px 0;
+    line-height: 1.6;
   }
 
   .todo-meta {
     display: grid;
     grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
-    gap: 12px;
-    margin-bottom: 12px;
+    gap: 16px;
+    margin-bottom: 16px;
   }
 
   .meta-item {
     display: flex;
     align-items: center;
     gap: 8px;
+    font-size: 14px;
   }
 
   .label {
-    font-size: 14px;
-    color: #6b7280;
-    font-weight: 500;
+    color: var(--muted-text);
+    font-weight: 600;
   }
 
   .assignee {
-    font-weight: 600;
-    color: #111827;
+    font-weight: 700;
   }
 
   .priority-badge {
-    padding: 4px 12px;
-    color: white;
-    border-radius: 4px;
+    padding: 4px 14px;
+    color: #fff;
+    border-radius: 999px;
     font-size: 13px;
-    font-weight: 600;
+    font-weight: 700;
   }
 
   .status-select {
-    padding: 4px 8px;
+    padding: 6px 10px;
     border: 2px solid;
-    border-radius: 4px;
-    background: white;
-    font-weight: 600;
+    border-radius: 12px;
+    background: transparent;
+    color: inherit;
+    font-weight: 700;
     cursor: pointer;
-    font-size: 14px;
   }
 
   .due-date {
     font-size: 14px;
-    font-weight: 500;
+    font-weight: 600;
   }
 
   .due-date.overdue {
-    color: #dc2626;
-    font-weight: 700;
+    color: var(--danger);
   }
 
   .due-date.due-today {
-    color: #f59e0b;
-    font-weight: 700;
+    color: var(--warning);
   }
 
   .due-date.due-soon {
-    color: #ea580c;
-    font-weight: 600;
+    color: var(--status-progress);
   }
 
   .todo-footer {
     display: flex;
+    flex-wrap: wrap;
     gap: 16px;
-    padding-top: 12px;
-    border-top: 1px solid #e5e7eb;
+    padding-top: 16px;
+    border-top: 1px dashed var(--panel-border);
     font-size: 13px;
-    color: #6b7280;
-  }
-
-  .created-at, .completed-at {
-    display: flex;
-    align-items: center;
+    color: var(--muted-text);
   }
 
   .completed-at {
-    color: #10b981;
-    font-weight: 500;
+    color: var(--safe);
+    font-weight: 600;
   }
 </style>

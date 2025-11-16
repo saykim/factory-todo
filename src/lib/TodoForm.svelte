@@ -1,11 +1,12 @@
 <script>
-  import { createEventDispatcher } from 'svelte';
+  import { createEventDispatcher, tick } from 'svelte';
   import { PRIORITY_OPTIONS, STATUS_OPTIONS, CATEGORY_OPTIONS, ASSIGNEE_OPTIONS } from './constants.js';
 
   export let editingTodo = null;
   export let show = false;
 
   const dispatch = createEventDispatcher();
+  let overlayEl;
 
   let formData = {
     title: '',
@@ -62,11 +63,40 @@
     };
     dispatch('close');
   }
+
+  function handleOverlayClick(event) {
+    if (event.target === event.currentTarget) {
+      handleClose();
+    }
+  }
+
+  function handleOverlayKey(event) {
+    if (['Escape', 'Enter', ' '].includes(event.key)) {
+      event.preventDefault();
+      handleClose();
+    }
+  }
+
+  $: if (show) {
+    tick().then(() => overlayEl?.focus());
+  }
 </script>
 
 {#if show}
-  <div class="modal-overlay" on:click={handleClose}>
-    <div class="modal-content" on:click|stopPropagation>
+  <div
+    class="modal-overlay"
+    role="presentation"
+    tabindex="-1"
+    bind:this={overlayEl}
+    on:click={handleOverlayClick}
+    on:keydown={handleOverlayKey}
+  >
+    <div
+      class="modal-content"
+      role="dialog"
+      aria-modal="true"
+      aria-label={editingTodo ? '작업 수정' : '새 작업 추가'}
+    >
       <div class="modal-header">
         <div class="modal-heading">
           <span class="mode-chip">{editingTodo ? '수정 모드' : '신규 작업'}</span>
@@ -182,55 +212,53 @@
 <style>
   .modal-overlay {
     position: fixed;
-    top: 0;
-    left: 0;
-    right: 0;
-    bottom: 0;
-    background: rgba(0, 0, 0, 0.5);
+    inset: 0;
+    background: rgba(4, 7, 15, 0.7);
     display: flex;
     align-items: center;
     justify-content: center;
     z-index: 1000;
     padding: 20px;
+    backdrop-filter: blur(4px);
   }
 
   .modal-content {
-    background: white;
-    border-radius: 16px;
+    background: var(--surface-strong);
+    border-radius: 28px;
     width: 100%;
-    max-width: 720px;
+    max-width: 780px;
     max-height: 90vh;
+    overflow: hidden;
     display: flex;
     flex-direction: column;
-    overflow: hidden;
-    box-shadow: 0 30px 60px -15px rgba(15, 23, 42, 0.35);
+    box-shadow: var(--shadow-soft);
+    border: 1px solid var(--panel-border);
   }
 
   .modal-header {
     display: flex;
     justify-content: space-between;
     align-items: flex-start;
-    gap: 12px;
-    padding: 24px;
-    border-bottom: 1px solid #e5e7eb;
-  }
-
-  .modal-heading h2 {
-    margin: 6px 0 0;
-    font-size: 22px;
-    color: #0f172a;
+    gap: 16px;
+    padding: clamp(20px, 3vw, 32px);
+    border-bottom: 1px solid var(--panel-border);
   }
 
   .modal-heading {
     display: flex;
     flex-direction: column;
-    gap: 4px;
+    gap: 8px;
     flex: 1;
   }
 
+  .modal-heading h2 {
+    margin: 0;
+    font-size: clamp(22px, 3vw, 28px);
+  }
+
   .modal-subtitle {
-    margin: 6px 0 0;
-    color: #6b7280;
+    margin: 0;
+    color: var(--muted-text);
     font-size: 14px;
   }
 
@@ -239,10 +267,11 @@
     align-items: center;
     padding: 4px 12px;
     border-radius: 999px;
-    background: #eef2ff;
-    color: #4338ca;
-    font-size: 13px;
+    background: var(--chip-bg);
+    color: var(--chip-text);
+    font-size: 12px;
     font-weight: 600;
+    letter-spacing: 0.05em;
   }
 
   .btn-close {
@@ -250,39 +279,34 @@
     border: none;
     font-size: 32px;
     cursor: pointer;
-    color: #6b7280;
+    color: var(--muted-text);
     line-height: 1;
     padding: 0;
-    width: 32px;
-    height: 32px;
-  }
-
-  .btn-close:hover {
-    color: #111827;
   }
 
   .todo-form {
-    padding: 24px;
+    padding: clamp(20px, 3vw, 32px);
     overflow-y: auto;
+    display: flex;
+    flex-direction: column;
+    gap: 18px;
   }
 
   .form-section {
-    border: 1px solid #e5e7eb;
-    border-radius: 12px;
+    border: 1px solid var(--panel-border);
+    border-radius: 22px;
     padding: 20px;
-    margin-bottom: 20px;
-    background: #f9fafb;
+    background: var(--surface);
   }
 
   .section-header h3 {
     margin: 0;
-    font-size: 16px;
-    color: #111827;
+    font-size: 18px;
   }
 
   .section-header p {
     margin: 6px 0 16px;
-    color: #6b7280;
+    color: var(--muted-text);
     font-size: 13px;
   }
 
@@ -314,19 +338,18 @@
   label {
     display: block;
     margin-bottom: 6px;
-    font-weight: 500;
-    color: #374151;
+    font-weight: 600;
     font-size: 14px;
   }
 
   .required {
-    color: #ef4444;
+    color: var(--danger);
   }
 
   .helper-text {
     margin: 4px 0 0;
     font-size: 12px;
-    color: #9ca3af;
+    color: var(--muted-text);
   }
 
   input[type="text"],
@@ -335,11 +358,13 @@
   select {
     width: 100%;
     padding: 12px 14px;
-    border: 1px solid #d1d5db;
-    border-radius: 6px;
+    border: 1px solid var(--control-border);
+    border-radius: 14px;
     font-size: 14px;
     font-family: inherit;
-    transition: border-color 0.2s;
+    background: var(--control-bg);
+    color: var(--text-primary);
+    transition: border-color 0.2s, box-shadow 0.2s;
   }
 
   input[type="text"]:focus,
@@ -347,8 +372,8 @@
   textarea:focus,
   select:focus {
     outline: none;
-    border-color: #3b82f6;
-    box-shadow: 0 0 0 3px rgba(59, 130, 246, 0.1);
+    border-color: var(--accent);
+    box-shadow: 0 0 0 3px var(--control-focus);
   }
 
   textarea {
@@ -360,46 +385,39 @@
     display: flex;
     gap: 12px;
     justify-content: flex-end;
-    margin-top: 24px;
-    padding-top: 20px;
-    border-top: 1px solid #e5e7eb;
-    position: sticky;
-    bottom: 0;
-    background: white;
+    margin-top: 12px;
   }
 
   .btn-cancel,
   .btn-submit {
-    padding: 10px 24px;
+    padding: 12px 24px;
     border: none;
-    border-radius: 6px;
-    font-size: 14px;
+    border-radius: 16px;
+    font-size: 15px;
     font-weight: 600;
     cursor: pointer;
-    transition: all 0.2s;
+    transition: transform 0.2s;
   }
 
   .btn-cancel {
-    background: #f3f4f6;
-    color: #374151;
-  }
-
-  .btn-cancel:hover {
-    background: #e5e7eb;
+    background: var(--surface-muted);
+    color: var(--text-primary);
   }
 
   .btn-submit {
-    background: #3b82f6;
-    color: white;
+    background: linear-gradient(120deg, var(--accent), var(--accent-strong));
+    color: #fff;
+    box-shadow: 0 18px 30px rgba(0, 0, 0, 0.25);
   }
 
   .btn-submit:hover {
-    background: #2563eb;
+    transform: translateY(-2px);
   }
 
   @media (max-width: 640px) {
     .modal-content {
       max-height: 100vh;
+      border-radius: 16px;
     }
 
     .modal-header {
@@ -420,9 +438,8 @@
     }
 
     .form-actions {
-      flex-direction: column-reverse;
+      flex-direction: column;
       align-items: stretch;
-      position: static;
     }
   }
 </style>
